@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Station } from '../../models/station';
-import { Platform } from 'ionic-angular';
 import { Subscription } from 'rxjs/Subscription';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { MusicControls } from '@ionic-native/music-controls';
 
 @Injectable()
 export class MediaStreamProvider {
@@ -28,7 +28,7 @@ export class MediaStreamProvider {
 
   constructor(
     private http: HttpClient,
-    private platform:Platform
+    private musicControls: MusicControls
   ) {
     this.httpSubscriptions = new Subscription()
     this.uSubscriptions = new Subscription()
@@ -38,9 +38,6 @@ export class MediaStreamProvider {
 
   private checkPlatform(){
       this.mediaFile = new Audio()
-
-
-
       this.setStreamSource = (src:string)=>{
         this.mediaFile.src = this.streamUrl.streamHttp+src
       }
@@ -51,11 +48,13 @@ export class MediaStreamProvider {
     this.mediaFile.pause()
     this.notPlaying = true
     this.streamPause.next(this.notPlaying)
+    this.musicControls.updateIsPlaying(false);
   }
   resumeStream() {
     this.notPlaying = false
     this.streamPause.next(this.notPlaying)
     this.mediaFile.play()
+    this.musicControls.updateIsPlaying(true);
   }
 
   getActiveStation(): Station {
@@ -112,6 +111,7 @@ export class MediaStreamProvider {
         let d = { ...e, song: s }
         this.meta = d
         this.streamMeta.next(d)
+        this.showNotification();
       },error=>{
         console.log(error)
           this.die()
@@ -131,6 +131,44 @@ export class MediaStreamProvider {
   private die() {
     this.uSubscriptions.unsubscribe();
     clearTimeout(this.timeout || 1)
+  }
+
+  showNotification() {
+    this.musicControls.create({
+      track       : this.meta.Title,
+      artist      : this.meta.Artist,
+      cover       : this.meta.Image,
+
+      hasPrev   : false,
+      hasNext   : false,
+      hasClose  : false,
+      ticker    : `Now playing ${this.meta.Artist} - ${this.meta.Title}`,
+    });
+
+    this.musicControls.subscribe().subscribe(action => {
+
+        const message = JSON.parse(action).message;
+            switch(message) {
+                case 'music-controls-pause':
+                    this.pauseStream();
+                    break;
+                case 'music-controls-play':
+                    this.resumeStream();
+                    break;
+                case 'music-controls-media-button' :
+                    // Do something
+                    break;
+                case 'music-controls-headset-unplugged':
+                    this.pauseStream();
+                    break;
+                case 'music-controls-headset-plugged':
+                    this.resumeStream();
+                    break;
+                default:
+                    break;
+            }
+      });
+      this.musicControls.listen();
   }
 }
 
