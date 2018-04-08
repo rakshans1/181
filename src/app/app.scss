@@ -14,3 +14,67 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+.header-md::after {
+  background-image: none;
+}
+.content {
+  background: $background-gradient;
+}
+
+.item {
+  background-color: transparent;
+  padding-left: 0px;
+
+  &:nth-child(odd) {
+    // background: color($colors, 'primary');
+    background: linear-gradient(to right, #603d4d, #6b4051, #754354, #804557, #8b4859);
+  }
+  &:nth-child(even) {
+    background: linear-gradient(to right, #6b4454, #764758, #814a5c, #8c4c5f, #974f62);
+  }
+}
+
+.item.activated {
+  background: color($colors, 'dark');
+}
+
+.list-md .item-block .item-inner {
+  border-bottom: 0px;
+}
+
+.toolbar-background-md {
+  background-color: transparent;
+}
+.toolbar-title-md {
+  font-weight: 200;
+}
+
+
+//Helper Classes
+.d-flex {
+  display: flex;
+}
+
+.d-space-between {
+  justify-content: space-between;
+}
+
+.d-flex-end {
+  justify-content: flex-end;
+}
+
+.d-space-around {
+  justify-content: space-around;
+}
+
+.d-space-evenly {
+  justify-content: space-evenly;
+}
+
+.row-reverse {
+  flex-direction: row-reverse;
+}
+
+.text-center {
+  text-align: center;
+}
